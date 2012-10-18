@@ -1,6 +1,6 @@
 /*
  * menu.c
- * 
+ * Used for testing menu functionality
  * Copyright 2012 Jesper Stockenstrand <jesper@jesper-UX31E>
  * 
  * This program is free software; you can redistribute it and/or modify
