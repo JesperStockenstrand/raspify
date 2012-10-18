@@ -1,3 +1,5 @@
+// lcd.c by j3557o
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/i2c-dev.h>
