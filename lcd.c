@@ -1,4 +1,16 @@
 // lcd.c by j3557o
+//          __________
+//         |    U     | 
+//    gnd -|A0     Vdd|- 3v3 from RPi
+//    gnd -|A1     SDA|- SDL from RPi
+//    gnd -|A2     SCL|- SCL from RPi
+//   DB04 -|P0 i2c INT|-
+//   DB05 -|P1      P7|- RS
+//   DB06 -|P2      P6|-
+//   DB07 -|P3      P5|- EN
+//    gnd -|Vss     P4|-
+//         |__________|
+  
 
 #include <stdio.h>
 #include <stdlib.h>
