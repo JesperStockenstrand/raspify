@@ -13,13 +13,7 @@
   
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <linux/i2c-dev.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <time.h>
-#include <unistd.h>
 
 //Define pin nr for EN and RS
 #define LCD_RS 0x80

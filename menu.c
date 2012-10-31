@@ -26,6 +26,12 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
+#include <linux/input.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
+#include "button.c"
+#include "lcd.c"
 
 #define MainMenu   0
 #define Settings   1
@@ -49,7 +55,7 @@ char line2[21] = "";
 char line3[21] = "";
 char line4[21] = "";
 
-char playlists[5][30];
+char playlists[255][255];
 
 int scrollpos=0;
 char upperCursor[2] = ">";
@@ -58,11 +64,12 @@ char lowerCursor[2] = " ";
 int Shuffle = 0;
 int Repeat = 0;
 
-int checkButton(int button);
+
 int mygetch();
 void updateLCD();
 char *scrolled (char *orginaltext, char* desttext, int scrollpos);
-char *substring(char *string, int position, int length) ;
+char *substring(char *string, int position, int length);
+int is_key_pressed(int fd, int key);
 
 int main(int argc, char **argv)
 {
@@ -120,7 +127,7 @@ int main(int argc, char **argv)
 				strcat(line3, "Settings");
 				strcpy(line4, "     [ ^ ][ v ][SEL]");
 				updateLCD();
-				button = checkButton(button);
+				button = checkButton();
 				
 				switch(button)
 				{
@@ -178,7 +185,7 @@ int main(int argc, char **argv)
 				}
 				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
 				updateLCD();
-				button = checkButton(button);
+				button = checkButton();
 				
 				switch(button)
 				{
@@ -251,7 +258,7 @@ int main(int argc, char **argv)
 				strcat(line3, tmpline);
 				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
 				updateLCD();
-				button = checkButton(button);
+				button = checkButton();
 				
 				switch(button)
 				{
@@ -292,7 +299,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		
-		usleep(1000);
+		usleep(100000);
 		
 		
 		
@@ -329,30 +336,7 @@ char *scrolled (char *orginaltext, char* desttext, int m_scrollpos)
 	
 }
 
-int checkButton(int button)
-{
-	int keyPress = mygetch();
-	keyPress = keyPress - 48;
-	if ((keyPress > 0) || (keyPress < 5))
-	{
-		return keyPress;
-	}
-	return 0;
-}
 
-int mygetch()
-{
-  struct termios oldt,
-                 newt;
-  int            ch;
-  tcgetattr( STDIN_FILENO, &oldt );
-  newt = oldt;
-  newt.c_lflag &= ~( ICANON | ECHO );
-  tcsetattr( STDIN_FILENO, TCSANOW, &newt );
-  ch = getchar();
-  tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
-  return ch;
-}
 
 void updateLCD()
 {

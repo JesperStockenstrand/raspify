@@ -1,7 +1,7 @@
-/*
+/* mini
  * A minimal despotify client, based on simple client.
- *
- * $Id: simple.c 514 2010-12-13 22:15:51Z dstien $
+ * 
+ * 
  *
  */
 
@@ -9,22 +9,12 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <strings.h>
-#include <unistd.h>
-#include <wchar.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "audio.h"
 #include "despotify.h"
 #include "util.h"
-
+//#include "menu.c"
 
 
 static void* audio_device;
@@ -83,7 +73,7 @@ static void* thread_loop(void* arg) {
                 int rc = despotify_get_pcm(ds, &pcm);
                 if (rc == 0) {
                     audio_play_pcm(audio_device, &pcm);
-		}
+				}
                 else {
                     printf("despotify_get_pcm() returned error %d\n", rc);
                     exit(-1);
@@ -94,7 +84,7 @@ static void* thread_loop(void* arg) {
             case EXIT:
                 loop = false;
                 break;
-        }
+		}
     }
 
     pthread_cond_destroy(&thread_cond);
@@ -109,13 +99,13 @@ struct playlist* get_playlist(struct playlist* rootlist, int num) {
     struct playlist* p = rootlist;
 
 
-        /* skip to playlist number <num> */
-        for (int i = 1; i < num && p; i++) {
-            p = p->next;
+	/* skip to playlist number <num> */
+    for (int i = 1; i < num && p; i++) {
+		p = p->next;
 	}
 
-        if (!p) {
-            printf("Invalid playlist number %d\n", num);
+    if (!p) {
+		printf("Invalid playlist number %d\n", num);
 	}
 
 
@@ -142,7 +132,7 @@ void print_list_of_lists(struct playlist* rootlist) {
         //PRINT ALL PLAYLISTS
         for (struct playlist* p = rootlist; p; p = p->next) {
             printf("%2d: %-40s\n", count++, p->name);       
-	}
+		}
     }
 }
 
@@ -159,15 +149,17 @@ void print_tracks(struct track* head) {
             printf("%3d: %s - ", count++, t->title);
             for (struct artist* a = t->artist; a; a = a->next) {
                 printf("%s%s", a->name, a->next ? ", " : "");
-	    }
+			}
             printf(" %s\n", t->playable ? "" : "(Unplayable)");
         }
         else {
             printf("%3d: N/A\n", count++);
-	}
+		}
     }
 }
 
+
+//THIS IS THE MAIN PROGRAM LOOP
 void command_loop(struct despotify_session* ds) {
     bool loop = true;
     char *buf;
@@ -176,24 +168,24 @@ void command_loop(struct despotify_session* ds) {
 
     
 
-if (!rootlist) {
-                    rootlist = despotify_get_stored_playlists(ds);
-		}
-                print_list_of_lists(rootlist);
+	if (!rootlist) {
+		rootlist = despotify_get_stored_playlists(ds);
+	}
+    print_list_of_lists(rootlist);
 		
     do {
-	printf("\n> ");
+		
         fflush(stdout);
-	if((buf = wrapper_read_command()) == NULL) {
-	    break;
-	}
+		if((buf = wrapper_read_command()) == NULL) {
+			break;
+		}
 
         /* list */
         if (!strncmp(buf, "list", 4)) {
             int num = 0;
             if(strlen(buf) > 5) {
-		num = atoi(buf + 5);
-	    }
+				num = atoi(buf + 5);
+			}
 			
             if (num) {
                 struct playlist* p = get_playlist(rootlist, num);
@@ -209,7 +201,7 @@ if (!rootlist) {
         /* play */
         else if (!strncmp(buf, "play", 4) || !strncmp(buf, "next", 4)) {
             if (!lastlist) {
-		printf("No list to play from. Use 'list' or 'search' to select a list.\n");
+				printf("No list to play from. Use 'list' or 'search' to select a list.\n");
                 continue;
             }
 
@@ -220,16 +212,16 @@ if (!rootlist) {
                 t = lastlist->tracks;
                 for (int i=1; i<listoffset && t; i++) {
                     t = t->next;
-		}
+				}
 
                 if (t) {
                     despotify_play(ds, t, true);
                     thread_play();
                 }
                 else {
-		    printf("Invalid track number %d\n", listoffset);
-		}
-            }
+					printf("Invalid track number %d\n", listoffset);
+				}
+			}
             else {
                 despotify_next(ds);
             }
@@ -258,7 +250,7 @@ if (!rootlist) {
     } while(loop);
 
     if (rootlist) { 
-	despotify_free_playlist(rootlist); 
+		despotify_free_playlist(rootlist); 
     }
 
 }
@@ -271,46 +263,53 @@ void callback(struct despotify_session* ds, int signal, void* data, void* callba
     switch (signal) {
         case DESPOTIFY_NEW_TRACK: {
             struct track* t = data;
-	    printf("%s - %s\n", t->artist->name,  t->title);
+			printf("%s - %s\n", t->artist->name,  t->title);
             break;
         }
-
+        
         case DESPOTIFY_TIME_TELL:
             if ((int)(*((double*)data)) != seconds) {
                 seconds = *((double*)data);
-		printf("%d:%02d\n", seconds / 60, seconds % 60);
+				printf("%d:%02d\n", seconds / 60, seconds % 60);
             }
             break;
 
         case DESPOTIFY_END_OF_PLAYLIST:
-	    printf("End of playlist\n");
+			printf("End of playlist\n");
             thread_pause();
             break;
     }
 }
 
 int main(int argc, char** argv) {
+    //STARTING UP
+    
     printf("Starting Raspify\n");
     setlocale(LC_ALL, "");
-
+	
+	//CHECK ARGS
     if (argc < 3) {
 	printf("Usage: %s <username> <password>\n", argv[0]);
         return 1;
     }
     
+    //DESPOTIFY INIT
     if (!despotify_init()) {
 	printf("despotify_init() failed\n");
         return 1;
     }
-
+	
+	//CREATE DESPOTIFY SESSION
     struct despotify_session* ds = despotify_init_client(callback, NULL, true, true);
     if (!ds) {
 	printf("despotify_init_client() failed\n");
         return 1;
     }
-
+	
+	//START/TRANSFER SESSION TO SEPARATE THREAD
     pthread_create(&thread, NULL, &thread_loop, ds);
-
+	
+	//TRY SPOTIFY LOGIN
     if (!despotify_authenticate(ds, argv[1], argv[2])) {
         printf("Authentication failed: %s\n", despotify_get_error(ds));
         despotify_exit(ds);
@@ -319,8 +318,13 @@ int main(int argc, char** argv) {
     printf("Logged in to Spotify\n");
 
     audio_device = audio_init();
-
+	
+	
+	//START MAIN LOOP
     command_loop(ds);
+    
+    
+    //START GRACEFUL SHUTDOWN
     thread_exit();
     audio_exit(audio_device);
     despotify_exit(ds);
@@ -347,41 +351,41 @@ char *wrapper_read_command(void) {
     int ret;
 
     if(command) {
-	free(command);
-	command = NULL;
+		free(command);
+		command = NULL;
     }
 
     for(;;) {
-	FD_ZERO(&rfds);
+		FD_ZERO(&rfds);
 
 		
-	if(isatty(0)) {
-	    FD_SET(0, &rfds);
-	}
+		if(isatty(0)) {
+			FD_SET(0, &rfds);
+		}
 	
-	if(select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0) {
-	    break;
-	}
+		if(select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0) {
+			break;
+		}
 	
-	if(FD_ISSET(0, &rfds)) {
-	    ret = read(0, stdin_buf + stdin_buf_len, sizeof(stdin_buf) - stdin_buf_len - 1);
-	    if(ret > 0) {
-		stdin_buf_len += ret;
-		stdin_buf[stdin_buf_len] = 0;
-	    }
-	}
+		if(FD_ISSET(0, &rfds)) {
+			ret = read(0, stdin_buf + stdin_buf_len, sizeof(stdin_buf) - stdin_buf_len - 1);
+			if(ret > 0) {
+				stdin_buf_len += ret;
+				stdin_buf[stdin_buf_len] = 0;
+			}
+		}
 
-	if((ptr = strchr(stdin_buf, '\n')) != NULL) {
-	    *ptr++ = 0;
-	    if(strlen(stdin_buf)) {
-		command = strdup(stdin_buf);
-            }		
-	    stdin_buf_len -= ptr - stdin_buf;
-	    memmove(stdin_buf, ptr, stdin_buf_len + 1);
-	    if(command) {
-		break;
-	    }
-	}
+		if((ptr = strchr(stdin_buf, '\n')) != NULL) {
+			*ptr++ = 0;
+			if(strlen(stdin_buf)) {
+				command = strdup(stdin_buf);
+			}		
+			stdin_buf_len -= ptr - stdin_buf;
+			memmove(stdin_buf, ptr, stdin_buf_len + 1);
+			if(command) {
+				break;
+			}
+		}
     }
     return command;
 }
