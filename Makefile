@@ -1,26 +1,42 @@
-IDIR =../include
 CC=gcc
-CFLAGS=-I$(IDIR) -Wall -Wextra -ggdb -std=gnu99 -Wno-pointer-sign
 
-ODIR=obj
-LDIR =../lib
+CFLAGS=-Wall -Wextra -ggdb -std=gnu99 -Wno-pointer-sign 
+LT = libtool $(SILENTLIB) --tag=CC
+LDFLAGS = -lz -lvorbisfile
+LDFLAGS += -lcrypto
+LD = $(CC)
+SILENT := @
 
-LIBS=-lm
+OBJS = mini.o
+LIBDIR = ../../lib
+LIB = despotify
 
-_DEPS = hellomake.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
+CFLAGS += -I$(LIBDIR)
 
-_OBJ = hellomake.o hellofunc.o 
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+OBJS += libao.o
+LDFLAGS += -lpthread -lao
 
 
-$(ODIR)/%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
 
-hellomake: $(OBJ)
-	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+all: mini
 
-.PHONY: clean
+# These are the files we depgen for. :-)
+CFILES = $(OBJS:.o=.c)
+include ../depgen.mk
+
+mini: $(OBJS) $(LIB)
+	@echo LD $@
+	$(SILENT)$(LT) --mode=link $(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(OBJS) $(LIB)
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ 
+	$(LT) --mode=clean rm -f mini
+	rm -f $(OBJS) Makefile.dep
+
+install: simple
+	@echo "Copying mini binary to $(INSTALL_PREFIX)/bin/${package}-mini"
+	install -d $(INSTALL_PREFIX)/bin/
+	$(LT) --mode=install install mini $(INSTALL_PREFIX)/bin/${package}-mini
+
+uninstall:
+	@echo "Removing mini..."
+	rm -f $(INSTALL_PREFIX)/bin/${package}-mini
