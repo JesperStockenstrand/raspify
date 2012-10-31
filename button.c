@@ -29,24 +29,39 @@
 #include <linux/input.h>
 #include <fcntl.h>
 
+
 int is_key_pressed(int fd, int key);
+
+int preButton = 0;
 
 int checkButton() {
 	int fd;
-	fd = open ("/dev/input/event2", O_RDONLY);
+	fd = open ("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
 	if (is_key_pressed(fd, KEY_1) == 1) {
-		printf("->1\n");
-		return 1;
+		if (preButton != 1)	{
+			preButton = 1;
+			return 1;
+		}
 	} else if (is_key_pressed(fd, KEY_2) == 1) {
-		return 2;
+		if (preButton != 2) {
+			preButton = 2;
+			return 2;
+		}
 	} else if (is_key_pressed(fd, KEY_3) == 1) {
-		return 3;
+		if (preButton != 3) {
+			preButton = 3;
+			return 3;
+		}
 	} else if (is_key_pressed(fd, KEY_4) == 1) {
-		return 4;
+		if (preButton != 4) {
+			preButton = 4;
+			return 4;
+		}
+	} else {
+		preButton = 0;
+		return 0;
 	}
-	
 	return 0;
-
 }
 
 int is_key_pressed(int fd, int key) {

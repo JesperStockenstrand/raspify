@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-#include "button.c"
+//#include "button.c"
 #include "lcd.c"
 
 #define MainMenu   0
@@ -64,14 +64,221 @@ char lowerCursor[2] = " ";
 int Shuffle = 0;
 int Repeat = 0;
 
-
-int mygetch();
+int state;
+//int mygetch();
 void updateLCD();
 char *scrolled (char *orginaltext, char* desttext, int scrollpos);
 char *substring(char *string, int position, int length);
-int is_key_pressed(int fd, int key);
+//int is_key_pressed(int fd, int key);
 
-int main(int argc, char **argv)
+void initMenu() {
+	int state = MainMenu;
+	mmenuLH.CursorPos = CursorUp;
+	mmenuLH.ListIndex = 0;
+	
+	settingsLH.CursorPos = CursorUp;
+	settingsLH.ListIndex = 0;
+	
+	playlistLH.CursorPos = CursorUp;
+	playlistLH.ListIndex = 0;
+	strcpy(line1, "     MAIN MENU");
+	strcpy(line2, "    "); 
+	strcat(line2, upperCursor);
+	strcat(line2, "Playlists");
+	strcpy(line3, "    "); 
+	strcat(line3, lowerCursor);
+	strcat(line3, "Settings");
+	strcpy(line4, "     [ ^ ][ v ][SEL]");
+	updateLCD();
+}
+
+void updateMenu(int button) {
+	switch(state) {
+		case MainMenu:
+			strcpy(line1, "     MAIN MENU");
+			if (mmenuLH.CursorPos == CursorUp) {
+				strcpy(upperCursor, ">");
+				strcpy(lowerCursor, " ");
+			} else {
+				strcpy(upperCursor, " ");
+				strcpy(lowerCursor, ">");
+			}	
+			strcpy(line2, "    "); 
+			strcat(line2, upperCursor);
+			strcat(line2, "Playlists");
+			strcpy(line3, "    ");
+			strcat(line3, lowerCursor);
+			strcat(line3, "Settings");
+			strcpy(line4, "     [ ^ ][ v ][SEL]");
+			updateLCD();
+				
+			switch(button) {
+				case 2:
+					mmenuLH.CursorPos=CursorUp;
+					break;
+						
+				case 3:
+					mmenuLH.CursorPos=CursorDown;
+					break;
+						
+				case 4:
+					if (mmenuLH.CursorPos==CursorUp) {
+						state = Playlists;
+					} else {
+						state = Settings;
+					}
+					break;
+						
+			}
+			break;
+				
+		case Settings:
+			strcpy(line1, "      SETTINGS");
+			if (settingsLH.CursorPos == CursorUp) {
+				strcpy(upperCursor, ">");
+				strcpy(lowerCursor, " ");
+			} else {
+				strcpy(upperCursor, " ");
+				strcpy(lowerCursor, ">");
+			}	
+			strcpy(line2, "    "); 
+			strcat(line2, upperCursor);
+			strcat(line2, "Shuffle");
+			if (Shuffle == 1) {
+				strcat(line2, " ON");
+			} else {
+				strcat(line2, " OFF");
+			}
+			strcpy(line3, "    ");
+			strcat(line3, lowerCursor);
+			strcat(line3, "Repeat");
+			if (Repeat == 1) {
+				strcat(line3, " ON");
+			} else {
+				strcat(line3, " OFF");
+			}
+			strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
+			updateLCD();
+			
+			switch(button) {
+				case 1:
+					state = MainMenu;
+					break;
+						
+				case 2:
+					settingsLH.CursorPos = CursorUp;
+					break;
+						
+				case 3:
+					settingsLH.CursorPos = CursorDown;
+					break;
+						
+				case 4:
+					if(settingsLH.CursorPos == CursorUp) {
+						Shuffle = 1^Shuffle;
+					} else {
+						Repeat = 1^Repeat;
+					}
+					break;
+			}
+			break;
+			
+			/*case Playlists:
+				strcpy(line1, "      PLAYLISTS");
+				if (playlistLH.CursorPos == CursorUp)
+				{
+					strcpy(upperCursor, ">");
+					strcpy(lowerCursor, " ");
+				} else
+				{
+					strcpy(upperCursor, " ");
+					strcpy(lowerCursor, ">");
+				}	
+				strcpy(line2, "    "); 
+				strcat(line2, upperCursor);
+				char *tmpline;
+				if (playlistLH.CursorPos == CursorUp)
+				{
+					
+					tmpline = scrolled(playlists[playlistLH.ListIndex], texttrunc, scrollpos++);
+					if(scrollpos == strlen(playlists[playlistLH.ListIndex]) + 1)
+					{
+						scrollpos = -14;
+					}
+				} else
+				{
+					tmpline = scrolled(playlists[playlistLH.ListIndex], texttrunc, 0);
+				}
+				strcat(line2, tmpline);
+				strcpy(line3, "    ");
+				strcat(line3, lowerCursor);
+				//char *tmpline;
+				if (playlistLH.CursorPos == CursorDown)
+				{
+					
+					tmpline = scrolled(playlists[playlistLH.ListIndex+1], texttrunc, scrollpos++);
+					if(scrollpos == strlen(playlists[playlistLH.ListIndex+1]) + 1)
+					{
+						scrollpos = -14;
+					}
+				} else
+				{
+					tmpline = scrolled(playlists[playlistLH.ListIndex+1], texttrunc, 0);
+				}
+				strcat(line3, tmpline);
+				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
+				updateLCD();
+				button = checkButton();
+				
+				switch(button)
+				{
+					case 1:
+						state = MainMenu;
+						scrollpos = 0;
+						break;
+					
+					case 2:
+						if((playlistLH.CursorPos == CursorUp) && (playlistLH.ListIndex > 0))
+						{
+							playlistLH.ListIndex--;
+						} else
+						{
+							playlistLH.CursorPos = CursorUp;
+						}
+						scrollpos = 0;
+						break;
+						
+					case 3:
+						if((playlistLH.CursorPos == CursorDown) && (playlistLH.ListIndex < (arrlen-2)))
+						{
+							playlistLH.ListIndex++;
+						} else
+						{
+							playlistLH.CursorPos = CursorDown;
+						}
+						scrollpos = 0;
+						break;
+				}
+			*/
+			case Playlist:
+			
+			break;
+			
+			case Playing:
+			
+			break;
+		}
+		
+		
+		
+		
+		
+}
+	
+	
+
+
+int old_main(int argc, char **argv)
 {
 	mmenuLH.CursorPos = CursorUp;
 	mmenuLH.ListIndex = 0;
@@ -92,14 +299,14 @@ int main(int argc, char **argv)
 	//printf("%s", scrolled(playlists[0], texttrunc, 2));
 	
 	int button = 0;
-	int state = MainMenu;
+	//int state = MainMenu;
 		
 	strcpy(line1, "     MAIN MENU");
 	strcpy(line2, "    "); 
 	strcat(line2, upperCursor);
 	strcat(line2, "Playlists");
 	strcpy(line3, "    "); 
-	strcat(line3, upperCursor);
+	strcat(line3, lowerCursor);
 	strcat(line3, "Settings");
 	strcpy(line4, "     [ ^ ][ v ][SEL]");
 		

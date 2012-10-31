@@ -14,7 +14,10 @@
 #include "audio.h"
 #include "despotify.h"
 #include "util.h"
-//#include "menu.c"
+#include "button.c"
+#include "menu.c"
+
+
 
 
 static void* audio_device;
@@ -166,22 +169,37 @@ void command_loop(struct despotify_session* ds) {
     struct playlist* rootlist = NULL;
     struct playlist* lastlist = NULL;
 
-    
+    int buttonpressed = 0;
 
 	if (!rootlist) {
 		rootlist = despotify_get_stored_playlists(ds);
 	}
     print_list_of_lists(rootlist);
 		
+	initMenu();
+	
     do {
 		
-        fflush(stdout);
-		if((buf = wrapper_read_command()) == NULL) {
-			break;
-		}
+        //fflush(stdout);
+		//if((buf = wrapper_read_command()) == NULL) {
+		//	break;
+		//}
+		
+		buttonpressed = checkButton();
+		//if (buttonpressed == 0) {
+		//printf("btn: %d\n", buttonpressed);
+		//	break;
+		//}
+			/*
+			struct playlist* p = get_playlist(rootlist, 9);
 
+            if (p) {
+				print_tracks(p->tracks);
+                lastlist = p;
+            } */
+        updateMenu(buttonpressed);
         /* list */
-        if (!strncmp(buf, "list", 4)) {
+        /*if (!strncmp(buf, "list", 4)) {
             int num = 0;
             if(strlen(buf) > 5) {
 				num = atoi(buf + 5);
@@ -196,16 +214,16 @@ void command_loop(struct despotify_session* ds) {
                 }
             }
            
-        }
+        }*/
 
-        /* play */
+        /* play 
         else if (!strncmp(buf, "play", 4) || !strncmp(buf, "next", 4)) {
             if (!lastlist) {
 				printf("No list to play from. Use 'list' or 'search' to select a list.\n");
                 continue;
             }
 
-            /* skip to track <num>, else play next */
+            /* skip to track <num>, else play next 
             struct track* t;
             if (buf[4]) {
                 int listoffset = atoi(buf + 5);
@@ -227,26 +245,28 @@ void command_loop(struct despotify_session* ds) {
             }
         }
 
-        /* stop */
+        /* stop 
         else if (!strncmp(buf, "stop", 4)) {
             thread_pause();
             despotify_stop(ds);
         }
 
-        /* pause */
+        /* pause 
         else if (!strncmp(buf, "pause", 5)) {
             thread_pause();
         }
 
-        /* resume */
+        /* resume 
         else if (!strncmp(buf, "resume", 5)) {
             thread_play();
         }
 
-        /* quit (REMOVE)*/
+        /* quit (REMOVE)
         else if (!strncmp(buf, "quit", 4)) {
             loop = false;
         }
+        */
+        usleep(20000);
     } while(loop);
 
     if (rootlist) { 
