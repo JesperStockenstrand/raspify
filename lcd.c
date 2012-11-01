@@ -52,7 +52,7 @@ void write_nibbles(int bits);
 void write_lcd(int bits);
 void lcd_clear();
 void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]);
-
+void lcd_string(char *s);
 
 void LCD_setup() {
 	if ((fd = open(fileName, O_RDWR)) < 0) {
@@ -120,19 +120,17 @@ void lcd_clear() {
 }
 
 void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]) {
-	int i;
-	for (i=0; i<21;i++) {
-		write_char(row_1[i]);
-	}
-	for (i=0; i<21;i++) {
-		write_char(row_3[i]);
-	}
-	for (i=0; i<21;i++) {
-		write_char(row_2[i]);
-	}
-	for (i=0; i<21;i++) {
-		write_char(row_4[i]);
-	}
+	lcd_string(row_1);
+	lcd_string(row_3);
+	lcd_string(row_2);
+	lcd_string(row_4);
 }
 	
-
+void lcd_string(char *s)
+{
+        int i;
+        for(i = 0; i<strlen(s); i++)
+        {
+                write_char(s[i]);
+        }
+}
