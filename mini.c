@@ -116,7 +116,7 @@ struct playlist* get_playlist(struct playlist* rootlist, int num) {
 }
 
 
-//GET PLAYLISTS
+//PRINT PLAYLISTS
 void print_list_of_lists(struct playlist* rootlist) {
 // Step forward to index start point
 // Read two list at the time
@@ -131,11 +131,13 @@ void print_list_of_lists(struct playlist* rootlist) {
         printf(" <no stored playlists>\n");
     }
     else {
-        int count=1;
+        int count=0;
         //PRINT ALL PLAYLISTS
         for (struct playlist* p = rootlist; p; p = p->next) {
-            printf("%2d: %-40s\n", count++, p->name);       
+            strcpy(playlists[count++], p->name);
+            //printf("%2d: %-40s\n", count++, p->name);       
 		}
+		numOfPL = count;
     }
 }
 
@@ -146,19 +148,30 @@ void print_tracks(struct track* head) {
         return;
     }
 
-    int count = 1;
+    int count = 0;
     for (struct track* t = head; t; t = t->next) {
-        if (t->has_meta_data) {
-            printf("%3d: %s - ", count++, t->title);
-            for (struct artist* a = t->artist; a; a = a->next) {
-                printf("%s%s", a->name, a->next ? ", " : "");
+		if (t->playable) {
+			if (t->has_meta_data) {
+				//printf("%3d: %s - ", count++, t->title);
+				strcpy(tracks[count], t->title);
+				strcat(tracks[count], " - ");
+				for (struct artist* a = t->artist; a; a = a->next) {
+					//printf("%s%s", a->name, a->next ? ", " : "");
+					strcat(tracks[count], a->name);
+					strcat(tracks[count], " ");
+				}
+				//printf(" %s\n", t->playable ? "" : "(Unplayable)");
+				
 			}
-            printf(" %s\n", t->playable ? "" : "(Unplayable)");
-        }
-        else {
-            printf("%3d: N/A\n", count++);
+			else {
+				strcpy(tracks[count], "N/A");
+			}
+		} else {
+			strcpy(tracks[count],"UNPLAYABLE");
 		}
+		count++;
     }
+    numOfTracks = count;
 }
 
 
@@ -168,7 +181,9 @@ void command_loop(struct despotify_session* ds) {
     char *buf;
     struct playlist* rootlist = NULL;
     struct playlist* lastlist = NULL;
-
+	
+	int preSelectedList = 1;
+	
     int buttonpressed = 0;
 
 	if (!rootlist) {
@@ -186,10 +201,10 @@ void command_loop(struct despotify_session* ds) {
 		//}
 		
 		buttonpressed = checkButton();
-		//if (buttonpressed == 0) {
-		//printf("btn: %d\n", buttonpressed);
-		//	break;
-		//}
+		
+		
+		
+		
 			/*
 			struct playlist* p = get_playlist(rootlist, 9);
 
@@ -197,24 +212,25 @@ void command_loop(struct despotify_session* ds) {
 				print_tracks(p->tracks);
                 lastlist = p;
             } */
-        updateMenu(buttonpressed);
+        if (buttonpressed != 0) { updateMenu(buttonpressed); }
         /* list */
         /*if (!strncmp(buf, "list", 4)) {
             int num = 0;
             if(strlen(buf) > 5) {
 				num = atoi(buf + 5);
 			}
-			
-            if (num) {
-                struct playlist* p = get_playlist(rootlist, num);
+			*/
+            if (SelectedList != preSelectedList) {
+                struct playlist* p = get_playlist(rootlist, SelectedList);
 
                 if (p) {
                     print_tracks(p->tracks);
                     lastlist = p;
+                    preSelectedList = SelectedList;
                 }
             }
            
-        }*/
+        /*}
 
         /* play 
         else if (!strncmp(buf, "play", 4) || !strncmp(buf, "next", 4)) {
@@ -266,7 +282,7 @@ void command_loop(struct despotify_session* ds) {
             loop = false;
         }
         */
-        usleep(20000);
+        usleep(50000);
     } while(loop);
 
     if (rootlist) { 
