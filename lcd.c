@@ -50,6 +50,9 @@ void lcd_init();
 void PutBitsOnPins(int bits);
 void write_nibbles(int bits);
 void write_lcd(int bits);
+void lcd_clear();
+void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]);
+
 
 void LCD_setup() {
 	if ((fd = open(fileName, O_RDWR)) < 0) {
@@ -111,3 +114,25 @@ void write_char(char letter) {
 	write_lcd((((int)letter >> 4) & 0x0F)|LCD_RS);
 	write_lcd(((int)letter & 0x0F)|LCD_RS);
 }
+
+void lcd_clear() {
+	write_nibbles(CMD_CAH);
+}
+
+void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]) {
+	int i;
+	for (i=0; i<21;i++) {
+		write_char(row_1[i]);
+	}
+	for (i=0; i<21;i++) {
+		write_char(row_3[i]);
+	}
+	for (i=0; i<21;i++) {
+		write_char(row_2[i]);
+	}
+	for (i=0; i<21;i++) {
+		write_char(row_4[i]);
+	}
+}
+	
+

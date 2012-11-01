@@ -50,10 +50,10 @@ struct ListHandler
 	int CursorPos;
 }mmenuLH, settingsLH, playlistLH, tracksLH;
 
-char line1[23] = "";
-char line2[23] = "";
-char line3[23] = "";
-char line4[23] = "";
+char line1[22] = "";
+char line2[22] = "";
+char line3[22] = "";
+char line4[22] = "";
 
 char playlists[255][255];
 char tracks[1024][255];
@@ -78,6 +78,7 @@ char *substring(char *string, int position, int length);
 
 void initMenu() {
 	state = MainMenu;
+	LCD_setup();
 	
 	mmenuLH.CursorPos = CursorUp;
 	mmenuLH.ListIndex = 0;
@@ -256,10 +257,10 @@ void updateMenu(int button) {
 				}	
 				strcpy(line2, upperCursor);
 				
-				tmpline = substring(playlists[playlistLH.ListIndex],0,21);
+				tmpline = substring(playlists[playlistLH.ListIndex],0,19);
 				strcat(line2, tmpline);
 				strcpy(line3, lowerCursor);
-				tmpline = substring(playlists[playlistLH.ListIndex+1],0,21);
+				tmpline = substring(playlists[playlistLH.ListIndex+1],0,19);
 				strcat(line3, tmpline);
 				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
 				updateLCD();
@@ -313,10 +314,10 @@ void updateMenu(int button) {
 					strcpy(lowerCursor, ">");
 				}	
 				strcpy(line2, upperCursor);
-				tmpline = substring(tracks[tracksLH.ListIndex],0,21);
+				tmpline = substring(tracks[tracksLH.ListIndex],0,19);
 				strcat(line2, tmpline);
 				strcpy(line3, lowerCursor);
-				tmpline = substring(tracks[tracksLH.ListIndex+1],0,21);
+				tmpline = substring(tracks[tracksLH.ListIndex+1],0,19);
 				strcat(line3, tmpline);
 				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
 				updateLCD();
@@ -615,6 +616,8 @@ void updateLCD()
 	printf("%s\n", line2);
 	printf("%s\n", line3);
 	printf("%s\n", line4);
+	lcd_clear();
+	write_rows(line1,line2,line3,line4);
 }
 
 char *substring(char *string, int position, int length) 
@@ -622,7 +625,7 @@ char *substring(char *string, int position, int length)
    char *pointer;
    int c;
  
-   pointer = malloc(length+1);
+   pointer = malloc(length+2);
  
    if (pointer == NULL)
    {
