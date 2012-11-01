@@ -617,7 +617,8 @@ void updateLCD()
 	printf("%s\n", line3);
 	printf("%s\n", line4);
 	lcd_clear();
-	write_rows(line1,line2,line3,line4);
+	//write_rows(line1,line2,line3,line4);
+	lcd_string("hej");
 }
 
 char *substring(char *string, int position, int length) 
