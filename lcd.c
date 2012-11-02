@@ -44,6 +44,7 @@
 int fd;
 char *fileName = "/dev/i2c-0";
 int address = 0x20;
+int lcd_connected = 0;
 
 void lcd_reset();
 void lcd_init();
@@ -57,14 +58,14 @@ void lcd_string(char *s);
 void LCD_setup() {
 	if ((fd = open(fileName, O_RDWR)) < 0) {
 		printf("Failed to open the i2c bus");
-		exit(1);
+		return;
 	}
 
 	if (ioctl(fd,I2C_SLAVE,address) < 0) {
 		printf("Failed to acquire bus access and/or talk to slave.\n");
-		exit(1);
+		return;
 	}
-
+	lcd_connected = 1;
 	lcd_reset();
 	lcd_init();
 }
@@ -116,6 +117,7 @@ void write_char(char letter) {
 }
 
 void lcd_clear() {
+	if (lcd_connected != 1) { return; }
 	write_nibbles(CMD_CAH);
 }
 
@@ -127,10 +129,10 @@ void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]) 
 }
 	
 void lcd_string(char *s)
-{
-        int i;
-        for(i = 0; i<strlen(s); i++)
-        {
-                write_char(s[i]);
-        }
+{	
+	if (lcd_connected != 1) { return; }
+	int i;
+    for(i = 0; i<strlen(s); i++) {
+		write_char(s[i]);
+    }
 }

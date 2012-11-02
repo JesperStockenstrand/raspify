@@ -22,7 +22,8 @@
 
 static void* audio_device;
 char *wrapper_read_command(void);
-
+struct track* new_t;
+char track_id[33];
 
 /****** PCM thread stuff: ***********/
 static pthread_t thread;
@@ -79,7 +80,7 @@ static void* thread_loop(void* arg) {
 				}
                 else {
                     printf("despotify_get_pcm() returned error %d\n", rc);
-                    exit(-1);
+                    //exit(-1);
                 }
                 break;
             }
@@ -118,15 +119,6 @@ struct playlist* get_playlist(struct playlist* rootlist, int num) {
 
 //PRINT PLAYLISTS
 void print_list_of_lists(struct playlist* rootlist) {
-// Step forward to index start point
-// Read two list at the time
-// for (int i = 1; i < num && p; i++) {
-//            p = p->next;
-//	}
-// line2 = p->name;
-// p->next;
-// line3 = p->name;
-
     if (!rootlist) {
         printf(" <no stored playlists>\n");
     }
@@ -152,15 +144,13 @@ void print_tracks(struct track* head) {
     for (struct track* t = head; t; t = t->next) {
 		if (t->playable) {
 			if (t->has_meta_data) {
-				//printf("%3d: %s - ", count++, t->title);
 				strcpy(tracks[count], t->title);
 				strcat(tracks[count], " - ");
 				for (struct artist* a = t->artist; a; a = a->next) {
-					//printf("%s%s", a->name, a->next ? ", " : "");
 					strcat(tracks[count], a->name);
 					strcat(tracks[count], " ");
 				}
-				//printf(" %s\n", t->playable ? "" : "(Unplayable)");
+				
 				
 			}
 			else {
@@ -183,6 +173,8 @@ void command_loop(struct despotify_session* ds) {
     struct playlist* lastlist = NULL;
 	
 	int preSelectedList = 1;
+	int preSelectedTrack = 0;
+	int pauseMode = 0;
 	
     int buttonpressed = 0;
 
@@ -194,93 +186,97 @@ void command_loop(struct despotify_session* ds) {
 	initMenu();
 	
     do {
-		
-        //fflush(stdout);
-		//if((buf = wrapper_read_command()) == NULL) {
-		//	break;
-		//}
-		
 		buttonpressed = checkButton();
 		
+		// BUTTON HAS BEEN PRESSED, UPDATE GUI
+		if (buttonpressed != 0) { 
+			menuTimeOut = time(NULL);
+			updateMenu(buttonpressed); 
+		}
 		
-		
-		
-			/*
-			struct playlist* p = get_playlist(rootlist, 9);
-
+		// NEW PLAYLIST MARKED IN GUI
+		if (SelectedList != preSelectedList) {
+			struct playlist* p = get_playlist(rootlist, SelectedList);
             if (p) {
 				print_tracks(p->tracks);
                 lastlist = p;
-            } */
-        if (buttonpressed != 0) { updateMenu(buttonpressed); }
-        /* list */
-        /*if (!strncmp(buf, "list", 4)) {
-            int num = 0;
-            if(strlen(buf) > 5) {
-				num = atoi(buf + 5);
+                preSelectedList = SelectedList;
+            }
+            preSelectedTrack = 0;
+		}
+			
+		// NEW TRACK SELECTED IN GUI
+		if (SelectedTrack != preSelectedTrack) {
+			struct track* t;
+			t = lastlist->tracks;
+            for (int i=1; i<SelectedTrack && t; i++) {
+				t = t->next;
 			}
-			*/
-            if (SelectedList != preSelectedList) {
-                struct playlist* p = get_playlist(rootlist, SelectedList);
-
-                if (p) {
-                    print_tracks(p->tracks);
-                    lastlist = p;
-                    preSelectedList = SelectedList;
-                }
+            if (t) {
+				preSelectedTrack = SelectedTrack;
+				thread_pause();
+				despotify_stop(ds);
+				despotify_play(ds, t, true);
+				thread_play();
+				playState = 1;
             }
-           
-        /*}
-
-        /* play 
-        else if (!strncmp(buf, "play", 4) || !strncmp(buf, "next", 4)) {
-            if (!lastlist) {
-				printf("No list to play from. Use 'list' or 'search' to select a list.\n");
-                continue;
+		}
+			
+		// PLAY NEXT TRACK
+		if (nextTrack == 1) {
+			despotify_next(ds);
+			playState = 1;
+			nextTrack = 0;
+		}
+			
+		// PLAY PREVIOUS TRACK (OR START FROM BEGINNING OF TRACK IF
+		// FIRST TRACK OR IF TRACK HAS BEEN RUNNING FOR MORE THAN 3 SECONDS
+		if (prevTrack == 1) {
+			struct track* t;
+		    int i;
+		    t = lastlist->tracks;
+            for (i=1; (strcmp((char*)t->track_id, track_id) != 0) && t; i++) {
+				t = t->next;
             }
-
-            /* skip to track <num>, else play next 
-            struct track* t;
-            if (buf[4]) {
-                int listoffset = atoi(buf + 5);
-                t = lastlist->tracks;
-                for (int i=1; i<listoffset && t; i++) {
-                    t = t->next;
+			if ((playTimeSec > 3) || (i == 1)) {
+				thread_pause();
+				despotify_stop(ds);
+				despotify_play(ds, t, true);
+				thread_play();
+            } else {			
+				t = lastlist->tracks;
+				for (int i=1; i<SelectedTrack && t; i++) {
+					t = t->next;
 				}
-
-                if (t) {
-                    despotify_play(ds, t, true);
-                    thread_play();
-                }
-                else {
-					printf("Invalid track number %d\n", listoffset);
+				if (t) {
+					preSelectedTrack = SelectedTrack;
+					thread_pause();
+					despotify_stop(ds);
+					despotify_play(ds, t, true);
+					thread_play();
 				}
 			}
-            else {
-                despotify_next(ds);
-            }
-        }
-
-        /* stop 
-        else if (!strncmp(buf, "stop", 4)) {
-            thread_pause();
-            despotify_stop(ds);
-        }
-
-        /* pause 
-        else if (!strncmp(buf, "pause", 5)) {
-            thread_pause();
-        }
-
-        /* resume 
+			playState = 1;
+			prevTrack = 0;
+		}
+       
+        // pause 
+        if (pauseMode != pauseTrack) {
+			if (pauseTrack == 1) {
+				thread_pause();
+				playState = 0;
+			} else {
+				thread_play();
+			}
+			pauseMode = pauseTrack;
+		}
+		
+		/*
+		//	resume 
         else if (!strncmp(buf, "resume", 5)) {
             thread_play();
         }
 
-        /* quit (REMOVE)
-        else if (!strncmp(buf, "quit", 4)) {
-            loop = false;
-        }
         */
         usleep(50000);
     } while(loop);
@@ -299,21 +295,35 @@ void callback(struct despotify_session* ds, int signal, void* data, void* callba
     switch (signal) {
         case DESPOTIFY_NEW_TRACK: {
             struct track* t = data;
-			printf("%s - %s\n", t->artist->name,  t->title);
+            
+			strcpy(playingArtist, t->artist->name);
+			strcpy(playingTrack, t->title);
+			playingLength = t->length/1000;
+			strcpy(track_id, (char*)t->track_id);
+			updateMenu(0);
             break;
         }
         
         case DESPOTIFY_TIME_TELL:
             if ((int)(*((double*)data)) != seconds) {
                 seconds = *((double*)data);
-				printf("%d:%02d\n", seconds / 60, seconds % 60);
+                playTimeSec = seconds;
+                updateMenu(0);
+				//printf("%d:%02d\n", seconds / 60, seconds % 60);
             }
             break;
 
-        case DESPOTIFY_END_OF_PLAYLIST:
-			printf("End of playlist\n");
-            thread_pause();
+        case DESPOTIFY_END_OF_PLAYLIST: 
+			if (Repeat != 1) {
+				//printf("End of playlist\n");
+				thread_pause();
+				playState = 0;
+				updateMenu(1);
+			} else {
+				SelectedTrack = 1;
+			}
             break;
+		
     }
 }
 
@@ -371,58 +381,5 @@ int main(int argc, char** argv) {
     }
 
     return 0;
-}
-
-//(REMOVE/MODIFY)
-char *wrapper_read_command(void) {
-    static char stdin_buf[256] = { 0 };
-    static int stdin_buf_len;
-    static char *command = NULL;
-	
-
-
-    fd_set rfds;
-    int max_fd = 0;
-    char *ptr;
-    int ret;
-
-    if(command) {
-		free(command);
-		command = NULL;
-    }
-
-    for(;;) {
-		FD_ZERO(&rfds);
-
-		
-		if(isatty(0)) {
-			FD_SET(0, &rfds);
-		}
-	
-		if(select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0) {
-			break;
-		}
-	
-		if(FD_ISSET(0, &rfds)) {
-			ret = read(0, stdin_buf + stdin_buf_len, sizeof(stdin_buf) - stdin_buf_len - 1);
-			if(ret > 0) {
-				stdin_buf_len += ret;
-				stdin_buf[stdin_buf_len] = 0;
-			}
-		}
-
-		if((ptr = strchr(stdin_buf, '\n')) != NULL) {
-			*ptr++ = 0;
-			if(strlen(stdin_buf)) {
-				command = strdup(stdin_buf);
-			}		
-			stdin_buf_len -= ptr - stdin_buf;
-			memmove(stdin_buf, ptr, stdin_buf_len + 1);
-			if(command) {
-				break;
-			}
-		}
-    }
-    return command;
 }
 

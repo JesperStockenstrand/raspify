@@ -36,7 +36,7 @@ int preButton = 0;
 
 int checkButton() {
 	int fd;
-	fd = open ("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
+	fd = open ("/dev/input/event2", O_RDONLY);  //event2 on work computer, event3 at home
 	if (is_key_pressed(fd, KEY_1) == 1) {
 		if (preButton != 1)	{
 			preButton = 1;

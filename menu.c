@@ -29,6 +29,7 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <time.h>
 
 //#include "button.c"
 #include "lcd.c"
@@ -57,14 +58,25 @@ char line4[22] = "";
 
 char playlists[255][255];
 char tracks[1024][255];
+char playingArtist[255];
+char playingTrack[255];
+int playingLength = 0;
 
 int SelectedList = 0;
+int SelectedTrack = 0;
+int nextTrack = 0;
+int prevTrack = 0;
+int pauseTrack = 0;
 
 int scrollpos=0;
 char upperCursor[2] = ">";
 char lowerCursor[2] = " ";
+
+int playTimeSec = 0;
+time_t menuTimeOut;
 int numOfPL;
 int numOfTracks;
+int playState = 0;
 
 int Shuffle = 0;
 int Repeat = 0;
@@ -77,8 +89,10 @@ char *substring(char *string, int position, int length);
 //int is_key_pressed(int fd, int key);
 
 void initMenu() {
-	state = MainMenu;
 	LCD_setup();
+	
+	state = MainMenu;
+	
 	
 	mmenuLH.CursorPos = CursorUp;
 	mmenuLH.ListIndex = 0;
@@ -108,6 +122,11 @@ void initMenu() {
 
 void updateMenu(int button) {
 	char *tmpline;
+	
+	if ((playState == 1) && (difftime(time(NULL), menuTimeOut) > 5)) {
+		state = Playing;
+	}
+	
 	switch(state) {
 		case MainMenu:
 			switch(button) {
@@ -297,9 +316,9 @@ void updateMenu(int button) {
 						break; 
 						
 					case 4:
-						//SelectedList = playlistLH.ListIndex + playlistLH.CursorPos + 1;
-						//state = Playlist;
-						//updateMenu(0);
+						SelectedTrack = tracksLH.ListIndex + tracksLH.CursorPos + 1;
+						state = Playing;
+						updateMenu(0);
 						return; 
 					
 				}
@@ -327,8 +346,39 @@ void updateMenu(int button) {
 			
 			
 			case Playing:
-			
-			break;
+				switch(button) {
+					case 1:
+						state = Playlist;
+						updateMenu(0);
+						return;
+					
+					case 2:
+						prevTrack = 1;
+						break;
+						
+					case 3:
+						pauseTrack = 1^pauseTrack;
+						break; 
+						
+					case 4:
+						//if (Shuffle == 1) {
+						nextTrack = 1;	
+						break;
+					
+				}
+				tmpline = substring(playingArtist,0,20);
+				strcpy(line1, tmpline);
+				tmpline = substring(playingTrack,0,20);
+				strcpy(line2, tmpline);
+				sprintf(tmpline, "%d:%02d/%d:%02d", playTimeSec / 60, playTimeSec % 60, playingLength / 60, playingLength % 60);
+				strcpy(line3, tmpline);
+				//sprintf(tmpline, "%02d", playTimeSec % 60);
+				//strcat(line3, ":");
+				//strcat(line3, tmpline);
+				
+				strcpy(line4, "[MNU][|<<][ ||][>>|]");
+				updateLCD();
+				break;
 		}
 		
 		
