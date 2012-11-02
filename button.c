@@ -32,9 +32,7 @@
 
 int btn;
 int kbd;
-char *LCD = "/dev/i2c-0";
 char *BUTTONS = "/dev/i2c-0";
-int LCDaddress = 0x20;
 int BTNaddress = 0x24;
 
 int is_key_pressed(int fd, int key);
@@ -45,7 +43,7 @@ int buttonsConnected = 0;
 
 void initButtons() {
 	if ((btn = open(BUTTONS, O_RDWR)) < 0) {
-		printf("Failed to open the i2c bus");
+		printf("Failed to open the i2c bus\n");
 		return;
 	}
 
@@ -54,10 +52,9 @@ void initButtons() {
 		return;
 	}
 	
-	kbd = open ("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
+	kbd = open("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
 	
 	buttonsConnected = 1;
-	
 }
 
 int checkButton() {
@@ -65,7 +62,7 @@ int checkButton() {
 	int button = 0;
 	
 	
-	
+		
 	if (is_key_pressed(kbd, KEY_1) == 1) {
 		if (preButton != 1)	{
 			preButton = 1;
@@ -91,25 +88,38 @@ int checkButton() {
 		//button = 0;
 	}
 	
+	
 	if (read(btn, buf, 1) != 1) {
-		printf("Error reading from i2c");
+		printf("Error reading from i2c\n");
 	} else {
 		
 		switch(buf[0]) {
-			case 13:
-				printf("8");
+			case 127:
+				if (preButton != 1) {
+					preButton = 1;
+					button = 1;
+				}
 				break;
 				
-			case 7:
-				printf("7");
+			case 191:
+				if (preButton != 2) {
+					preButton = 2;
+					button = 2;
+				}
 				break;
 				
-			case 3:
-				printf("6");
+			case 223:
+				if (preButton != 3) {
+					preButton = 3;
+					button = 3;
+				}
 				break;
 				
-			case 1:
-				printf("5");
+			case 239:
+				if (preButton != 4) {
+					preButton = 4;
+					button = 4;
+				}
 				break;
 		}
 	}
