@@ -82,11 +82,9 @@ int Shuffle = 0;
 int Repeat = 0;
 
 int state;
-//int mygetch();
 void updateLCD();
 char *scrolled (char *orginaltext, char* desttext, int scrollpos);
 char *substring(char *string, int position, int length);
-//int is_key_pressed(int fd, int key);
 
 void initMenu() {
 	LCD_setup();
@@ -108,15 +106,6 @@ void initMenu() {
 	
 	updateMenu(0);
 	
-	/*strcpy(line1, "     MAIN MENU");
-	strcpy(line2, "    "); 
-	strcat(line2, upperCursor);
-	strcat(line2, "Playlists");
-	strcpy(line3, "    "); 
-	strcat(line3, lowerCursor);
-	strcat(line3, "Settings");
-	strcpy(line4, "     [ ^ ][ v ][SEL]");
-	updateLCD(); */
 	
 }
 
@@ -239,7 +228,6 @@ void updateMenu(int button) {
 						{
 							playlistLH.CursorPos = CursorUp;
 						}
-						//scrollpos = 0;
 						SelectedList = playlistLH.ListIndex + playlistLH.CursorPos + 1;
 						break;
 						
@@ -252,7 +240,6 @@ void updateMenu(int button) {
 							playlistLH.CursorPos = CursorDown;
 						}
 						SelectedList = playlistLH.ListIndex + playlistLH.CursorPos + 1;
-						//scrollpos = 0;
 						break; 
 						
 					case 4:
@@ -301,7 +288,6 @@ void updateMenu(int button) {
 						{
 							tracksLH.CursorPos = CursorUp;
 						}
-						//scrollpos = 0;
 						break;
 						
 					case 3:
@@ -312,7 +298,6 @@ void updateMenu(int button) {
 						{
 							tracksLH.CursorPos = CursorDown;
 						}
-						//scrollpos = 0;
 						break; 
 						
 					case 4:
@@ -361,7 +346,6 @@ void updateMenu(int button) {
 						break; 
 						
 					case 4:
-						//if (Shuffle == 1) {
 						nextTrack = 1;	
 						break;
 					
@@ -370,12 +354,8 @@ void updateMenu(int button) {
 				strcpy(line1, tmpline);
 				tmpline = substring(playingTrack,0,20);
 				strcpy(line2, tmpline);
-				sprintf(tmpline, "%d:%02d/%d:%02d", playTimeSec / 60, playTimeSec % 60, playingLength / 60, playingLength % 60);
+				sprintf(tmpline, "       %d:%02d/%d:%02d", playTimeSec / 60, playTimeSec % 60, playingLength / 60, playingLength % 60);
 				strcpy(line3, tmpline);
-				//sprintf(tmpline, "%02d", playTimeSec % 60);
-				//strcat(line3, ":");
-				//strcat(line3, tmpline);
-				
 				strcpy(line4, "[MNU][|<<][ ||][>>|]");
 				updateLCD();
 				break;
@@ -386,249 +366,7 @@ void updateMenu(int button) {
 		
 		
 }
-	
-	
-/*
 
-int old_main(int argc, char **argv)
-{
-	mmenuLH.CursorPos = CursorUp;
-	mmenuLH.ListIndex = 0;
-	
-	settingsLH.CursorPos = CursorUp;
-	settingsLH.ListIndex = 0;
-	
-	playlistLH.CursorPos = CursorUp;
-	playlistLH.ListIndex = 0;
-	
-	strcpy(playlists[0], "Soft ABCDEFGHIJKLMAN");
-	strcpy(playlists[1], "Opera");
-	strcpy(playlists[2], "the Smiths");
-	strcpy(playlists[3], "New Order and other stuff");
-	strcpy(playlists[4], "Depeche Mode"); 
-	unsigned long arrlen = sizeof(playlists)/sizeof(playlists[0]);
-	char texttrunc[15];
-	//printf("%s", scrolled(playlists[0], texttrunc, 2));
-	
-	int button = 0;
-	//int state = MainMenu;
-		
-	strcpy(line1, "     MAIN MENU");
-	strcpy(line2, "    "); 
-	strcat(line2, upperCursor);
-	strcat(line2, "Playlists");
-	strcpy(line3, "    "); 
-	strcat(line3, lowerCursor);
-	strcat(line3, "Settings");
-	strcpy(line4, "     [ ^ ][ v ][SEL]");
-		
-	while(1)
-	{
-		switch(state)
-		{
-			case MainMenu:
-				
-				strcpy(line1, "     MAIN MENU");
-				if (mmenuLH.CursorPos == CursorUp)
-				{
-					strcpy(upperCursor, ">");
-					strcpy(lowerCursor, " ");
-				} else
-				{
-					strcpy(upperCursor, " ");
-					strcpy(lowerCursor, ">");
-				}	
-				strcpy(line2, "    "); 
-				strcat(line2, upperCursor);
-				strcat(line2, "Playlists");
-				strcpy(line3, "    ");
-				strcat(line3, lowerCursor);
-				strcat(line3, "Settings");
-				strcpy(line4, "     [ ^ ][ v ][SEL]");
-				updateLCD();
-				button = checkButton();
-				
-				switch(button)
-				{
-					case 2:
-						mmenuLH.CursorPos=CursorUp;
-						break;
-						
-					case 3:
-						mmenuLH.CursorPos=CursorDown;
-						break;
-						
-					case 4:
-						if (mmenuLH.CursorPos==CursorUp)
-						{
-							state = Playlists;
-						} else
-						{
-							state = Settings;
-						}
-						break;
-						
-				}
-				break;
-				
-			case Settings:
-				strcpy(line1, "      SETTINGS");
-				if (settingsLH.CursorPos == CursorUp)
-				{
-					strcpy(upperCursor, ">");
-					strcpy(lowerCursor, " ");
-				} else
-				{
-					strcpy(upperCursor, " ");
-					strcpy(lowerCursor, ">");
-				}	
-				strcpy(line2, "    "); 
-				strcat(line2, upperCursor);
-				strcat(line2, "Shuffle");
-				if (Shuffle == 1)
-				{
-					strcat(line2, " ON");
-				} else
-				{
-					strcat(line2, " OFF");
-				}
-				strcpy(line3, "    ");
-				strcat(line3, lowerCursor);
-				strcat(line3, "Repeat");
-				if (Repeat == 1)
-				{
-					strcat(line3, " ON");
-				} else
-				{
-					strcat(line3, " OFF");
-				}
-				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
-				updateLCD();
-				button = checkButton();
-				
-				switch(button)
-				{
-					case 1:
-						state = MainMenu;
-						break;
-						
-					case 2:
-						settingsLH.CursorPos = CursorUp;
-						break;
-						
-					case 3:
-						settingsLH.CursorPos = CursorDown;
-						break;
-						
-					case 4:
-						if(settingsLH.CursorPos == CursorUp)
-						{
-							Shuffle = 1^Shuffle;
-						} else
-						{
-							Repeat = 1^Repeat;
-						}
-						break;
-				}
-			break;
-			
-			case Playlists:
-				strcpy(line1, "      PLAYLISTS");
-				if (playlistLH.CursorPos == CursorUp)
-				{
-					strcpy(upperCursor, ">");
-					strcpy(lowerCursor, " ");
-				} else
-				{
-					strcpy(upperCursor, " ");
-					strcpy(lowerCursor, ">");
-				}	
-				strcpy(line2, "    "); 
-				strcat(line2, upperCursor);
-				char *tmpline;
-				if (playlistLH.CursorPos == CursorUp)
-				{
-					
-					tmpline = scrolled(playlists[playlistLH.ListIndex], texttrunc, scrollpos++);
-					if(scrollpos == strlen(playlists[playlistLH.ListIndex]) + 1)
-					{
-						scrollpos = -14;
-					}
-				} else
-				{
-					tmpline = scrolled(playlists[playlistLH.ListIndex], texttrunc, 0);
-				}
-				strcat(line2, tmpline);
-				strcpy(line3, "    ");
-				strcat(line3, lowerCursor);
-				//char *tmpline;
-				if (playlistLH.CursorPos == CursorDown)
-				{
-					
-					tmpline = scrolled(playlists[playlistLH.ListIndex+1], texttrunc, scrollpos++);
-					if(scrollpos == strlen(playlists[playlistLH.ListIndex+1]) + 1)
-					{
-						scrollpos = -14;
-					}
-				} else
-				{
-					tmpline = scrolled(playlists[playlistLH.ListIndex+1], texttrunc, 0);
-				}
-				strcat(line3, tmpline);
-				strcpy(line4, "[BCK][ ^ ][ v ][SEL]");
-				updateLCD();
-				button = checkButton();
-				
-				switch(button)
-				{
-					case 1:
-						state = MainMenu;
-						scrollpos = 0;
-						break;
-					
-					case 2:
-						if((playlistLH.CursorPos == CursorUp) && (playlistLH.ListIndex > 0))
-						{
-							playlistLH.ListIndex--;
-						} else
-						{
-							playlistLH.CursorPos = CursorUp;
-						}
-						scrollpos = 0;
-						break;
-						
-					case 3:
-						if((playlistLH.CursorPos == CursorDown) && (playlistLH.ListIndex < (arrlen-2)))
-						{
-							playlistLH.ListIndex++;
-						} else
-						{
-							playlistLH.CursorPos = CursorDown;
-						}
-						scrollpos = 0;
-						break;
-				}
-			
-			case Playlist:
-			
-			break;
-			
-			case Playing:
-			
-			break;
-		}
-		
-		usleep(100000);
-		
-		
-		
-	}
-	
-	return 0;
-}
-
-
-*/
 char *scrolled (char *orginaltext, char* desttext, int m_scrollpos)
 {
 	char tmpstr[26];
@@ -659,20 +397,16 @@ char *scrolled (char *orginaltext, char* desttext, int m_scrollpos)
 
 
 
-void updateLCD()
-{
+void updateLCD() {
 	system("clear");
 	printf("%s\n", line1);
 	printf("%s\n", line2);
 	printf("%s\n", line3);
 	printf("%s\n", line4);
 	lcd_clear();
-	//write_rows(line1,line2,line3,line4);
-	lcd_string("hej");
 }
 
-char *substring(char *string, int position, int length) 
-{
+char *substring(char *string, int position, int length) {
    char *pointer;
    int c;
  
@@ -680,8 +414,9 @@ char *substring(char *string, int position, int length)
  
    if (pointer == NULL)
    {
-      printf("Unable to allocate memory.\n");
-      exit(1);
+		strcpy(line2, "Unable to allocate memory");
+		updateLCD();
+		exit(1);
    }
  
    for (c = 0 ; c < position -1 ; c++) 

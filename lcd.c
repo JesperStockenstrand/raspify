@@ -128,8 +128,7 @@ void write_rows(char row_1[20], char row_2[20], char row_3[20], char row_4[20]) 
 	lcd_string(row_4);
 }
 	
-void lcd_string(char *s)
-{	
+void lcd_string(char *s) {	
 	if (lcd_connected != 1) { return; }
 	int i;
     for(i = 0; i<strlen(s); i++) {
