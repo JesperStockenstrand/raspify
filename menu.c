@@ -89,6 +89,7 @@ char *substring(char *string, int position, int length);
 void initMenu() {
 	LCD_setup();
 	
+	
 	state = MainMenu;
 	
 	
@@ -104,7 +105,7 @@ void initMenu() {
 	tracksLH.CursorPos = CursorUp;
 	tracksLH.ListIndex = 0;
 	
-	updateMenu(0);
+	//updateMenu(0);
 	
 	
 }
@@ -403,7 +404,12 @@ void updateLCD() {
 	printf("%s\n", line2);
 	printf("%s\n", line3);
 	printf("%s\n", line4);
-	lcd_clear();
+	//lcd_clear();
+	//write_nibbles(CMD_CAH);
+	lcd_line(line1);
+	lcd_line(line3);
+	lcd_line(line2);
+	lcd_line(line4);
 }
 
 char *substring(char *string, int position, int length) {

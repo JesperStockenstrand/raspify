@@ -31,14 +31,11 @@
 #include <linux/i2c-dev.h>
 
 int btn;
-int kbd;
 char *BUTTONS = "/dev/i2c-0";
 int BTNaddress = 0x24;
 
-int is_key_pressed(int fd, int key);
 
 int preButton = 0;
-int buttonsConnected = 0;
 
 
 void initButtons() {
@@ -52,43 +49,11 @@ void initButtons() {
 		return;
 	}
 	
-	kbd = open("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
-	
-	buttonsConnected = 1;
 }
 
 int checkButton() {
 	char buf[1];
 	int button = 0;
-	
-	
-		
-	if (is_key_pressed(kbd, KEY_1) == 1) {
-		if (preButton != 1)	{
-			preButton = 1;
-			button = 1;
-		}
-	} else if (is_key_pressed(kbd, KEY_2) == 1) {
-		if (preButton != 2) {
-			preButton = 2;
-			button = 2;
-		}
-	} else if (is_key_pressed(kbd, KEY_3) == 1) {
-		if (preButton != 3) {
-			preButton = 3;
-			button = 3;
-		}
-	} else if (is_key_pressed(kbd, KEY_4) == 1) {
-		if (preButton != 4) {
-			preButton = 4;
-			button = 4;
-		}
-	} else {
-		preButton = 0;
-		//button = 0;
-	}
-	
-	
 	if (read(btn, buf, 1) != 1) {
 		printf("Error reading from i2c\n");
 	} else {
@@ -121,16 +86,12 @@ int checkButton() {
 					button = 4;
 				}
 				break;
+			
+			default:
+				preButton = 0;
+
 		}
 	}
 	return button;
 }
 
-int is_key_pressed(int fd, int key) {
-    char key_b[(KEY_MAX + 7) / 8];
-
-    memset(key_b, 0, sizeof(key_b));
-    ioctl(fd, EVIOCGKEY(sizeof(key_b)), key_b);
-        
-    return !!(key_b[key/8] & (1<<(key % 8)));
-}

@@ -79,7 +79,7 @@ static void* thread_loop(void* arg) {
                     audio_play_pcm(audio_device, &pcm);
 				}
                 else {
-                    strcpy(line2, "despotify_get_pcm() returned error");
+                    strcpy(line2, "get_pcm error");
                     updateLCD();
                 }
                 break;
@@ -109,7 +109,7 @@ struct playlist* get_playlist(struct playlist* rootlist, int num) {
 	}
 
     if (!p) {
-		strcpy(line2, "Invalid playlist number");
+		strcpy(line2, "Invalid pl number");
         updateLCD();
 		//printf("Invalid playlist number %d\n", num);
 	}
@@ -188,7 +188,7 @@ void command_loop(struct despotify_session* ds) {
 	}
     print_list_of_lists(rootlist);
 		
-	initMenu();
+	//initMenu();
 	
     do {
 		buttonpressed = checkButton();
@@ -334,6 +334,8 @@ void callback(struct despotify_session* ds, int signal, void* data, void* callba
 
 int main(int argc, char** argv) {
     //STARTING UP
+    initMenu();
+	
     strcpy(line2, "Starting Raspify");
     updateLCD();
 	setlocale(LC_ALL, "");
@@ -346,7 +348,7 @@ int main(int argc, char** argv) {
     
     //DESPOTIFY INIT
     if (!despotify_init()) {
-		strcpy(line2, "despotify_init() failed");
+		strcpy(line2, "init failed");
 		updateLCD();
 		return 1;
     }
@@ -354,7 +356,7 @@ int main(int argc, char** argv) {
 	//CREATE DESPOTIFY SESSION
     struct despotify_session* ds = despotify_init_client(callback, NULL, true, true);
     if (!ds) {
-		strcpy(line2, "despotify_init_client() failed");
+		strcpy(line2, "client failed");
 		updateLCD();
 		return 1;
     }
@@ -364,7 +366,7 @@ int main(int argc, char** argv) {
 	
 	//TRY SPOTIFY LOGIN
     if (!despotify_authenticate(ds, argv[1], argv[2])) {
-        strcpy(line2, "Authentication failed");
+        strcpy(line2, "Auth failed");
 		updateLCD();
         despotify_exit(ds);
         return 1;
