@@ -39,59 +39,58 @@ int preButton = 0;
 
 
 void initButtons() {
-	if ((btn = open(BUTTONS, O_RDWR)) < 0) {
-		printf("Failed to open the i2c bus\n");
-		return;
-	}
+  if ((btn = open(BUTTONS, O_RDWR)) < 0) {
+    printf("Failed to open the i2c bus\n");
+    return;
+  }
 
-	if (ioctl(btn, I2C_SLAVE, BTNaddress) < 0) {
-		printf("Failed to acquire bus access and/or talk to slave.\n");
-		return;
-	}
-	
+  if (ioctl(btn, I2C_SLAVE, BTNaddress) < 0) {
+    printf("Failed to acquire bus access and/or talk to slave.\n");
+  return;
+  }
 }
 
 int checkButton() {
-	char buf[1];
-	int button = 0;
-	if (read(btn, buf, 1) != 1) {
-		printf("Error reading from i2c\n");
-	} else {
-		
-		switch(buf[0]) {
-			case 127:
-				if (preButton != 1) {
-					preButton = 1;
-					button = 1;
-				}
-				break;
+  char buf[1];
+  int button = 0;
+  if (read(btn, buf, 1) != 1) {
+    printf("Error reading from i2c\n");
+  }
+  else {
+    switch(buf[0]) {
+      case 127:
+        if (preButton != 1) {
+          preButton = 1;
+          button = 1;
+        }
+        break;
 				
-			case 191:
-				if (preButton != 2) {
-					preButton = 2;
-					button = 2;
-				}
-				break;
+      case 191:
+        if (preButton != 2) {
+          preButton = 2;
+          button = 2;
+        }
+        break;
 				
-			case 223:
-				if (preButton != 3) {
-					preButton = 3;
-					button = 3;
-				}
-				break;
+      case 223:
+        if (preButton != 3) {
+          preButton = 3;
+          button = 3;
+        }
+        break;
 				
-			case 239:
-				if (preButton != 4) {
-					preButton = 4;
-					button = 4;
-				}
-				break;
+      case 239:
+        if (preButton != 4) {
+          preButton = 4;
+          button = 4;
+        }
+        break;
 			
-			default:
-				preButton = 0;
+      default:
+        preButton = 0;
 
-		}
-	}
-	return button;
+    }
+  }
+  return button;
 }
 

@@ -71,104 +71,90 @@ void write_char(char letter);
 void lcd_line(char s[20]);
 void lcd_clear();
 
-void LCD_setup()
-{
-	if ((fd = open(fileName, O_RDWR)) < 0) 
-	{
-		printf("Failed to open the i2c bus\n");
-		exit(1);
-	}
-	if (ioctl(fd,I2C_SLAVE,address) < 0) 
-	{
-        	printf("Failed to acquire bus access and/or talk to slave.\n");
-        	exit(1);
-    	}
-    	lcd_reset();
-    	lcd_init();
+void LCD_setup() {
+  if ((fd = open(fileName, O_RDWR)) < 0) {
+    printf("Failed to open the i2c bus\n");
+    exit(1);
+  }
 	
+  if (ioctl(fd,I2C_SLAVE,address) < 0) {
+    printf("Failed to acquire bus access and/or talk to slave.\n");
+    exit(1);
+  }
+  lcd_reset();
+  lcd_init();
 }
 
-
-void write_lcd(int bits)
-{
-	PutBitsOnPins(bits+LCD_EN);
-	PutBitsOnPins(bits);
-	usleep(500);
+void write_lcd(int bits) {
+  PutBitsOnPins(bits+LCD_EN);
+  PutBitsOnPins(bits);
+  usleep(500);
 }
 
-void lcd_string(char *s)
-{
-	int i;
-	for(i = 0; i<strlen(s); i++)
-	{
-		write_char(s[i]);
-	}
+void lcd_string(char *s) {
+  int i;
+  for(i = 0; i<strlen(s); i++) {
+    write_char(s[i]);
+  }
 }
 
 void lcd_line(char *s) {
-	int i;
-	for(i = 0; i<20; i++)
-	{
-		if((i+1)>strlen(s)) {
-			write_char(' ');
-		} else {
-			write_char(s[i]);
-		}
-	}
+  int i;
+  for(i = 0; i<20; i++) {
+    if((i+1)>strlen(s)) {
+      write_char(' ');
+    }
+    else {
+      write_char(s[i]);
+    }
+  }
 }
 
-void PutBitsOnPins(char bits)
-{
-	char buf[1];
-	buf[0] = bits;
-
-    	if (write(fd,buf,1) != 1) 
-	{
-        	printf("Failed to write to the i2c bus.\n");
-    	}
+void PutBitsOnPins(char bits) {
+  char buf[1];
+  buf[0] = bits;
+  if (write(fd,buf,1) != 1) {
+    printf("Failed to write to the i2c bus.\n");
+  }
 }
 
 void lcd_clear() {
-	write_nibbles(CMD_CAH);
+  write_nibbles(CMD_CAH);
 }
 
-void lcd_reset()
-{
-	PutBitsOnPins(0xFF);
-	usleep(5000);
-	PutBitsOnPins(0x03+LCD_EN);
-	PutBitsOnPins(0x03);
-	usleep(5000);
-	PutBitsOnPins(0x03+LCD_EN);
-	PutBitsOnPins(0x03);
-	usleep(500);
-	PutBitsOnPins(0x03+LCD_EN);
-	PutBitsOnPins(0x03);
-	usleep(500);
-	PutBitsOnPins(0x02+LCD_EN);
-	PutBitsOnPins(0x02);
-	usleep(500);
+void lcd_reset() {
+  PutBitsOnPins(0xFF);
+  usleep(5000);
+  PutBitsOnPins(0x03+LCD_EN);
+  PutBitsOnPins(0x03);
+  usleep(5000);
+  PutBitsOnPins(0x03+LCD_EN);
+  PutBitsOnPins(0x03);
+  usleep(500);
+  PutBitsOnPins(0x03+LCD_EN);
+  PutBitsOnPins(0x03);
+  usleep(500);
+  PutBitsOnPins(0x02+LCD_EN);
+  PutBitsOnPins(0x02);
+  usleep(500);
 }
 
-void lcd_init()
-{
-	write_nibbles(CMD_SIL|SIL_N);
-	write_nibbles(CMD_EDC);
-	write_nibbles(CMD_CAH);
-	write_nibbles(CMD_SCMD|SCMD_ID);
-	write_nibbles(CMD_EDC|EDC_D);
+void lcd_init() {
+  write_nibbles(CMD_SIL|SIL_N);
+  write_nibbles(CMD_EDC);
+  write_nibbles(CMD_CAH);
+  write_nibbles(CMD_SCMD|SCMD_ID);
+  write_nibbles(CMD_EDC|EDC_D);
 }
 
-void write_nibbles(int bits)
-{
-	write_lcd((bits >> 4) & 0x0F);
-	write_lcd(bits & 0x0F);
-	usleep(500);
+void write_nibbles(int bits) {
+  write_lcd((bits >> 4) & 0x0F);
+  write_lcd(bits & 0x0F);
+  usleep(500);
 }
 
-void write_char(char letter)
-{
-	write_lcd((((int)letter >> 4) & 0x0F)|LCD_RS);
-	write_lcd(((int)letter & 0x0F)|LCD_RS);
+void write_char(char letter) {
+  write_lcd((((int)letter >> 4) & 0x0F)|LCD_RS);
+  write_lcd(((int)letter & 0x0F)|LCD_RS);
 }
 
