@@ -154,6 +154,9 @@ void write_nibbles(int bits) {
 }
 
 void write_char(char letter) {
+  if (((int)letter < 33) || ((int)letter > 125)) {
+    letter = "?";
+  }
   write_lcd((((int)letter >> 4) & 0x0F)|LCD_RS);
   write_lcd(((int)letter & 0x0F)|LCD_RS);
 }
