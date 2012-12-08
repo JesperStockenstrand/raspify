@@ -54,6 +54,7 @@
 
 #define CMD_MCD  0x80   //Move Cursor to Display Address
 #define CMD_CAH	 0x01	//Clear and Home
+#define CMD_HME  0x02	//Move home
 
 int fd;
 char *fileName = "/dev/i2c-0";
@@ -68,6 +69,7 @@ void write_lcd(int bits);
 void lcd_string(char *s);
 void write_char(char letter);
 void lcd_line(char s[20]);
+void lcd_clear();
 
 void LCD_setup()
 {
@@ -124,6 +126,10 @@ void PutBitsOnPins(char bits)
 	{
         	printf("Failed to write to the i2c bus.\n");
     	}
+}
+
+void lcd_clear() {
+	write_nibbles(CMD_CAH);
 }
 
 void lcd_reset()

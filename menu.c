@@ -131,10 +131,12 @@ void updateMenu(int button) {
 				case 4:
 					if (mmenuLH.CursorPos==CursorUp) {
 						state = Playlists;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					} else {
 						state = Settings;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					}
@@ -166,6 +168,7 @@ void updateMenu(int button) {
 			switch(button) {
 				case 1:
 					state = MainMenu;
+					lcd_clear();
 					updateMenu(0);
 					return;
 										
@@ -218,6 +221,7 @@ void updateMenu(int button) {
 				switch(button) {
 					case 1:
 						state = MainMenu;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					
@@ -248,6 +252,7 @@ void updateMenu(int button) {
 						state = Playlist;
 						tracksLH.CursorPos = CursorUp;
 						tracksLH.ListIndex = 0;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					
@@ -278,6 +283,7 @@ void updateMenu(int button) {
 				switch(button) {
 					case 1:
 						state = Playlists;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					
@@ -304,6 +310,7 @@ void updateMenu(int button) {
 					case 4:
 						SelectedTrack = tracksLH.ListIndex + tracksLH.CursorPos + 1;
 						state = Playing;
+						lcd_clear();
 						updateMenu(0);
 						return; 
 					
@@ -335,6 +342,7 @@ void updateMenu(int button) {
 				switch(button) {
 					case 1:
 						state = Playlist;
+						lcd_clear();
 						updateMenu(0);
 						return;
 					
@@ -420,7 +428,7 @@ char *substring(char *string, int position, int length) {
  
    if (pointer == NULL)
    {
-		strcpy(line2, "Unable to allocate memory");
+		strcpy(line2, "Unable to allocate mem");
 		updateLCD();
 		exit(1);
    }

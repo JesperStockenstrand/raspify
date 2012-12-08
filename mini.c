@@ -198,7 +198,9 @@ void command_loop(struct despotify_session* ds) {
 			menuTimeOut = time(NULL);
 			updateMenu(buttonpressed); 
 		}
-		
+		else {
+		 updateMenu(0);
+		}
 		// NEW PLAYLIST MARKED IN GUI
 		if (SelectedList != preSelectedList) {
 			struct playlist* p = get_playlist(rootlist, SelectedList);
@@ -283,7 +285,7 @@ void command_loop(struct despotify_session* ds) {
         }
 
         */
-        usleep(50000);
+        usleep(2000);
     } while(loop);
 
     if (rootlist) { 
@@ -313,7 +315,7 @@ void callback(struct despotify_session* ds, int signal, void* data, void* callba
             if ((int)(*((double*)data)) != seconds) {
                 seconds = *((double*)data);
                 playTimeSec = seconds;
-                updateMenu(0);
+                //updateMenu(0);
 				//printf("%d:%02d\n", seconds / 60, seconds % 60);
             }
             break;
@@ -377,7 +379,7 @@ int main(int argc, char** argv) {
 
     audio_device = audio_init();
 	initButtons();
-	
+	updateMenu(0);
 	//START MAIN LOOP
     command_loop(ds);
     
