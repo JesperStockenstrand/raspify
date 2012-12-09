@@ -84,7 +84,7 @@ char *scrolled (char *orginaltext, char* desttext, int scrollpos);
 char *substring(char *string, int position, int length);
 
 void initMenu() {
-  LCD_setup();
+  //LCD_setup();
   state = MainMenu;
 	
   mmenuLH.CursorPos = CursorUp;

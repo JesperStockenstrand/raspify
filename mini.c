@@ -362,7 +362,7 @@ int main(int argc, char** argv) {
   updateLCD();
     
   audio_device = audio_init();
-  initButtons();
+  //initButtons();
   updateMenu(0);
 	
   //START MAIN LOOP
