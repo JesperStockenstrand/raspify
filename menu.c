@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "lcd.c"
 
@@ -82,6 +83,8 @@ int state;
 void updateLCD();
 char *scrolled (char *orginaltext, char* desttext, int scrollpos);
 char *substring(char *string, int position, int length);
+char *tr ( char *s );
+
 
 void initMenu() {
   //LCD_setup();
@@ -102,6 +105,7 @@ void initMenu() {
 
 void updateMenu(int button) {
   char *tmpline;
+  int i;
 	
   if ((playState == 1) && (difftime(time(NULL), menuTimeOut) > 5)) {
     state = Playing;
@@ -337,11 +341,27 @@ void updateMenu(int button) {
             break;
 					
         }
-        tmpline = substring(playingArtist,0,20);
-        strcpy(line1, tmpline);
-        tmpline = substring(playingTrack,0,20);
-        strcpy(line2, tmpline);
-        sprintf(tmpline, "       %d:%02d/%d:%02d", playTimeSec / 60, playTimeSec % 60, playingLength / 60, playingLength % 60);
+        tmpline = tr(substring(playingArtist,0,20));
+        strcpy(line1,"");
+        
+        if (strlen(tmpline)<20) {
+          for (i=0;i<((20-strlen(tmpline))/2);i++) {
+            strcat(line1," ");
+          }
+        }
+        strcat(line1, tmpline);
+        
+        tmpline = tr(substring(playingTrack,0,20));
+        strcpy(line2,"");
+        
+        if (strlen(tmpline)<20) {
+          for (i=0;i<((20-strlen(tmpline))/2);i++) {
+            strcat(line2," ");
+          }
+        }
+        strcat(line2, tmpline);
+        
+        sprintf(tmpline, "      %d:%02d/%d:%02d", playTimeSec / 60, playTimeSec % 60, playingLength / 60, playingLength % 60);
         strcpy(line3, tmpline);
         strcpy(line4, "[MNU][|<<][ ||][>>|]");
         updateLCD();
@@ -404,4 +424,24 @@ char *substring(char *string, int position, int length) {
   *(pointer+c) = '\0';
  
   return pointer;
+}
+
+char *tr ( char *s )
+{
+  int i = 0;
+  int j = strlen ( s ) - 1;
+  int k = 0;
+ 
+  while ( isspace ( s[i] ) && s[i] != '\0' )
+    i++;
+ 
+  while ( isspace ( s[j] ) && j >= 0 )
+    j--;
+ 
+  while ( i <= j )
+    s[k++] = s[i++];
+ 
+  s[k] = '\0';
+ 
+  return s;
 }

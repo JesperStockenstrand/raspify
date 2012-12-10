@@ -69,7 +69,7 @@ void PutBitsOnPins(char bits);
 void write_nibbles(int bits);
 void write_lcd(int bits);
 void lcd_string(char *s);
-char write_char(char letter);
+void write_char(char letter);
 void lcd_line(char s[20]);
 void lcd_clear();
 
@@ -105,6 +105,7 @@ void lcd_string(char *s) {
 
 void lcd_line(char *s) {
   int i;
+    
   for(i = 0; i<20; i++) {
     if((i+1)>strlen(s)) {
       write_char(' ');
