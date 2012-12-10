@@ -59,10 +59,8 @@
 int fd;
 char *fileName = "/dev/i2c-0";
 int address = 0x20;
-int lcd_initialised = 0; // 0 = not initialised, 1 = initialised
+//int lcd_initialised = 0; // 0 = not initialised, 1 = initialised
 int lcd_connected = -1; // -1 = unknown, 0 = not connected, 1 = connected
-
-
 
 void lcd_reset();
 void LCD_setup();
@@ -71,7 +69,7 @@ void PutBitsOnPins(char bits);
 void write_nibbles(int bits);
 void write_lcd(int bits);
 void lcd_string(char *s);
-void write_char(char letter);
+char write_char(char letter);
 void lcd_line(char s[20]);
 void lcd_clear();
 
@@ -110,7 +108,7 @@ void lcd_line(char *s) {
   for(i = 0; i<20; i++) {
     if((i+1)>strlen(s)) {
       write_char(' ');
-    }
+	}
     else {
       write_char(s[i]);
     }
@@ -167,14 +165,9 @@ void write_nibbles(int bits) {
 }
 
 void write_char(char letter) {
-  //Not working, captures but å ä ö still shows
-  if (((int)letter < 32) || ((int)letter > 125) && ((int)letter != 32)) {
-    
+  if (((int)letter < 32) || ((int)letter > 125)) {
     letter = (char)63;
-    
   }
-  
-  
   write_lcd((((int)letter >> 4) & 0x0F)|LCD_RS);
   write_lcd(((int)letter & 0x0F)|LCD_RS);
 }
