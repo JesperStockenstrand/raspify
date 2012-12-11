@@ -32,7 +32,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "lcd.c"
+#include "lcd.h"
 
 #define MainMenu   0
 #define Settings   1

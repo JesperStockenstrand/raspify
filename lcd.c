@@ -28,6 +28,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h> 
+#include "lcd.h"
 
 //Define pin nr for EN and RS
 #define LCD_RS 0x20
@@ -56,24 +57,21 @@
 #define CMD_CAH	 0x01   //Clear and Home
 #define CMD_HME  0x02	  //Move home
 
-int fd;
-char *fileName = "/dev/i2c-0";
-int address = 0x20;
+static int fd;
+static char *fileName = "/dev/i2c-0";
+static int address = 0x20;
 //int lcd_initialised = 0; // 0 = not initialised, 1 = initialised
-int lcd_connected = -1; // -1 = unknown, 0 = not connected, 1 = connected
+static int lcd_connected = -1; // -1 = unknown, 0 = not connected, 1 = connected
 
-void lcd_reset();
-void LCD_setup();
-void lcd_init();
-void PutBitsOnPins(char bits);
-void write_nibbles(int bits);
-void write_lcd(int bits);
-void lcd_string(char *s);
-void write_char(char letter);
-void lcd_line(char s[20]);
-void lcd_clear();
+static void lcd_reset();
+static void LCD_setup();
+static void lcd_init();
+static void PutBitsOnPins(char bits);
+static void write_nibbles(int bits);
+static void write_lcd(int bits);
+static void write_char(char letter);
 
-void LCD_setup() {
+static void LCD_setup() {
   if ((fd = open(fileName, O_RDWR)) < 0) {
     printf("Failed to open the i2c bus\n");
     lcd_connected = 0;
@@ -90,7 +88,7 @@ void LCD_setup() {
   lcd_init();
 }
 
-void write_lcd(int bits) {
+static void write_lcd(int bits) {
   PutBitsOnPins(bits+LCD_EN);
   PutBitsOnPins(bits);
   usleep(500);
@@ -116,7 +114,7 @@ void lcd_line(char *s) {
   }
 }
 
-void PutBitsOnPins(char bits) {
+static void PutBitsOnPins(char bits) {
   if (lcd_connected == -1) {
     LCD_setup();
   }
@@ -134,7 +132,7 @@ void lcd_clear() {
   write_nibbles(CMD_CAH);
 }
 
-void lcd_reset() {
+static void lcd_reset() {
   PutBitsOnPins(0xFF);
   usleep(5000);
   PutBitsOnPins(0x03+LCD_EN);
@@ -151,7 +149,7 @@ void lcd_reset() {
   usleep(500);
 }
 
-void lcd_init() {
+static void lcd_init() {
   write_nibbles(CMD_SIL|SIL_N);
   write_nibbles(CMD_EDC);
   write_nibbles(CMD_CAH);
@@ -159,13 +157,13 @@ void lcd_init() {
   write_nibbles(CMD_EDC|EDC_D);
 }
 
-void write_nibbles(int bits) {
+static void write_nibbles(int bits) {
   write_lcd((bits >> 4) & 0x0F);
   write_lcd(bits & 0x0F);
   usleep(500);
 }
 
-void write_char(char letter) {
+static void write_char(char letter) {
   if (((int)letter < 32) || ((int)letter > 125)) {
     letter = (char)63;
   }
