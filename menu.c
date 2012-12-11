@@ -125,13 +125,13 @@ void updateMenu(int button) {
         case 4:
           if (mmenuLH.CursorPos==CursorUp) {
             state = Playlists;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
 					} 
           else {
             state = Settings;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
           }
@@ -159,7 +159,7 @@ void updateMenu(int button) {
       switch(button) {
         case 1:
           state = MainMenu;
-          lcd_clear();
+          extern void lcd_clear();
           updateMenu(0);
           return;
 										
@@ -216,7 +216,7 @@ void updateMenu(int button) {
         switch(button) {
           case 1:
             state = MainMenu;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
 					
@@ -244,7 +244,7 @@ void updateMenu(int button) {
             state = Playlist;
             tracksLH.CursorPos = CursorUp;
             tracksLH.ListIndex = 0;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
         }
@@ -272,7 +272,7 @@ void updateMenu(int button) {
         switch(button) {
           case 1:
             state = Playlists;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
 					
@@ -297,7 +297,7 @@ void updateMenu(int button) {
           case 4:
             SelectedTrack = tracksLH.ListIndex + tracksLH.CursorPos + 1;
             state = Playing;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return; 
         }
@@ -324,7 +324,7 @@ void updateMenu(int button) {
         switch(button) {
           case 1:
             state = Playlist;
-            lcd_clear();
+            extern void lcd_clear();
             updateMenu(0);
             return;
 					
@@ -397,10 +397,10 @@ void updateLCD() {
   printf("%s\n", line4);
 	//lcd_clear();
 	//write_nibbles(CMD_CAH);
-  lcd_line(line1);
-  lcd_line(line3);
-  lcd_line(line2);
-  lcd_line(line4);
+  extern void lcd_line(line1);
+  extern void lcd_line(line3);
+  extern void lcd_line(line2);
+  extern void lcd_line(line4);
 }
 
 char *substring(char *string, int position, int length) {

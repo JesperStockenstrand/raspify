@@ -28,7 +28,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h> 
-#include "lcd.h"
+
 
 //Define pin nr for EN and RS
 #define LCD_RS 0x20
