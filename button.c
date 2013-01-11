@@ -41,7 +41,7 @@ int preButton = 0;
 
 
 void initButtons() {
-  fd = open("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
+ // fd open("/dev/input/event3", O_RDONLY);  //event2 on work computer, event3 at home
 	
   if ((btn = open(BUTTONS, O_RDWR)) < 0) {
     printf("Failed to open the i2c bus\n");
@@ -66,7 +66,7 @@ int checkButton() {
   }
   
   
-	if (is_key_pressed(fd, KEY_1) == 1) {
+/*	if (is_key_pressed(fd, KEY_1) == 1) {
 		if (preButton != 1)	{
 			preButton = 1;
 			button = 1;
@@ -91,7 +91,7 @@ int checkButton() {
     preButton = 0;
     button = 0;
   }
-  
+  */
   if (buttonsConnected == 1) {
     
   
